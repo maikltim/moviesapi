@@ -1,12 +1,12 @@
 body {
-    background: #fdfdfd; 
-  }
+  background: #fdfdfd; }
 
-  .card-img--height {
-    height: 180px;
-    object-fit: cover;
-  }
+.invalid-feedback {
+  display: block; }
 
-  .invalid-feedback {
-    display: block;
-  }
+.card-img--height {
+  max-height: 161.84px;
+  object-fit: cover; }
+
+input.invalid {
+  border-color: #dc3545; }

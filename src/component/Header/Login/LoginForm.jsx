@@ -1,5 +1,6 @@
 import React from "react";
 import { API_URL, API_KEY_3, fetchApi } from "../../../api/api";
+import classNames from "classnames";
 
 export default class LoginForm extends React.Component {
   state = {
@@ -121,6 +122,11 @@ export default class LoginForm extends React.Component {
     }
   };
 
+  getClassForInput = key =>
+    classNames("form-control", {
+      invalid: this.state.errors[key]
+    });
+
   render() {
     const { username, password, errors, submitting } = this.state;
     return (
@@ -133,7 +139,7 @@ export default class LoginForm extends React.Component {
             <label htmlFor="username">Пользователь</label>
             <input
               type="text"
-              className="form-control"
+              className={this.getClassForInput("username")}
               id="username"
               placeholder="Пользователь"
               name="username"
@@ -149,7 +155,7 @@ export default class LoginForm extends React.Component {
             <label htmlFor="password">Пароль</label>
             <input
               type="password"
-              className="form-control"
+              className={this.getClassForInput("password")}
               id="password"
               placeholder="Пароль"
               name="password"
