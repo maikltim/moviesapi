@@ -1,30 +1,73 @@
+import queryString from "query-string";
+
 export const API_URL = "https://api.themoviedb.org/3";
 
-export const API_KEY_3 = "c97fc8c34ff5cbb4fedcc9f59c558b38";
+export const API_KEY_3 = "3f4ca4f3a9750da53450646ced312397";
 
-
-export const API_KEY_4 = 'yJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjOTdmYzhjMzRmZjVjYmI0ZmVkY2M5ZjU5YzU1OGIzOCIsInN1YiI6IjVlY2Y0N2M4ZTRiNTc2MDAxZjJjNzYxOCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8n-R1rnBAo4eNcUZ2nzF914eUi79FNNaOEjegOccuOk'
-
-
-
+export const API_KEY_4 =
+  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZjRjYTRmM2E5NzUwZGE1MzQ1MDY0NmNlZDMxMjM5NyIsInN1YiI6IjVhYzlmNWRkOTI1MTQxNjJhZTA1Njk0NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Fc4f9DVB6pFWh6hIjYe0NCC4pImdmNzDIfi_3Nb3tC4";
 
 export const fetchApi = (url, options = {}) => {
-    return new Promise((resolve, reject) => {
-      fetch(url, options)
-        .then(response => {
-          if (response.status < 400) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        })
-        .then(data => {
-          resolve(data);
-        })
-        .catch(response => {
-          response.json().then(error => {
-            reject(error);
-          });
+  return new Promise((resolve, reject) => {
+    fetch(url, options)
+      .then(response => {
+        if (response.status < 400) {
+          return response.json();
+        } else {
+          throw response;
+        }
+      })
+      .then(data => {
+        resolve(data);
+      })
+      .catch(response => {
+        response.json().then(error => {
+          reject(error);
         });
-    });
-  };
+      });
+  });
+};
+
+export default class CallApi {
+  static get(url, options = {}) {
+    const { params = {} } = options;
+    const queryStringParams = {
+      api_key: API_KEY_3,
+      ...params
+    };
+    // url = "/discover/movie"
+    // params = {
+    //language: "ru-RU",
+    // sort_by: sort_by,
+    // page: page,
+    // primary_release_year: primary_release_year
+    //}
+    return fetchApi(
+      `${API_URL}${url}?${queryString.stringify(queryStringParams)}`,
+      {
+        mode: "cors",
+        headers: {
+          "Content-type": "application/json"
+        }
+      }
+    );
+  }
+  static post(url, options = {}) {
+    const { params = {}, body = {} } = options;
+    const queryStringParams = {
+      api_key: API_KEY_3,
+      ...params
+    };
+    return fetchApi(
+      `${API_URL}${url}?${queryString.stringify(queryStringParams)}`,
+      {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: JSON.stringify(body)
+      }
+    );
+  }
+}

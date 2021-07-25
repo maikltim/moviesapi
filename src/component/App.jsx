@@ -1,15 +1,16 @@
 import React from "react";
 import Filters from "./Filters/Filters";
-import MoviesList from './Movies/MoviesList'
-import Header from './Header/Header'
-import Cookie from 'universal-cookie'
-import {fetchApi, API_URL, API_KEY_3} from '../api/api'
+import MoviesList from "./Movies/MoviesList";
+import Header from "./Header/Header";
+import { API_URL, API_KEY_3, fetchApi } from "../api/api";
+import Cookies from "universal-cookie";
 
-const cookies = new Cookie()
+const cookies = new Cookies();
 
+export const AppContext = React.createContext();
 export default class App extends React.Component {
-  constructor(){
-    super()
+  constructor() {
+    super();
 
     this.state = {
       user: null,
@@ -27,29 +28,37 @@ export default class App extends React.Component {
   updateUser = user => {
     this.setState({
       user
-    })
-  }
+    });
+  };
 
   updateSessionId = session_id => {
     cookies.set("session_id", session_id, {
-      path: '/',
-      expires: 600000
-    })
+      path: "/",
+      maxAge: 2592000
+    });
     this.setState({
       session_id
-    })
-  }
+    });
+  };
 
-  onChangeFilters = (event) => {
+  onLogOut = () => {
+    cookies.remove("session_id");
+    this.setState({
+      session_id: null,
+      user: null
+    });
+  };
+
+  onChangeFilters = event => {
     const value = event.target.value;
-    const name = event.target.name 
+    const name = event.target.name;
     this.setState(prevState => ({
       filters: {
         ...prevState.filters,
         [name]: value
       }
-    }))
-  }
+    }));
+  };
 
   onChangePagination = ({ page, total_pages = this.state.total_pages }) => {
     this.setState({
@@ -65,42 +74,52 @@ export default class App extends React.Component {
         `${API_URL}/account?api_key=${API_KEY_3}&session_id=${session_id}`
       ).then(user => {
         this.updateUser(user);
+        this.updateSessionId(session_id);
       });
     }
   }
 
-
   render() {
-    const {filters, page, total_pages, user} = this.state
+    const { filters, page, total_pages, user, session_id } = this.state;
     return (
-    <div>
-      <Header user={user} updateUser={this.updateUser} updateSessionId={this.updateSessionId} />
-      <div className="container">
-        <div className="row mt-4">
-          <div className="col-4">
-            <div className="card" style={{ width: "100%" }}>
-              <div className="card-body">
-                <h3>Фильтры:</h3>
-                <Filters 
-                page={page}
-                total_pages={total_pages}
-                filters={filters} 
-                onChangeFilters={this.onChangeFilters}
-                onChangePagination={this.onChangePagination}
+      <AppContext.Provider
+        value={{
+          user,
+          session_id,
+          updateUser: this.updateUser,
+          updateSessionId: this.updateSessionId,
+          onLogOut: this.onLogOut
+        }}
+      >
+        <div>
+          <Header user={user} />
+          <div className="container">
+            <div className="row mt-4">
+              <div className="col-4">
+                <div className="card w-100">
+                  <div className="card-body">
+                    <h3>Фильтры:</h3>
+                    <Filters
+                      page={page}
+                      total_pages={total_pages}
+                      filters={filters}
+                      onChangeFilters={this.onChangeFilters}
+                      onChangePagination={this.onChangePagination}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="col-8">
+                <MoviesList
+                  filters={filters}
+                  page={page}
+                  onChangePagination={this.onChangePagination}
                 />
               </div>
             </div>
           </div>
-          <div className="col-8">
-            <MoviesList 
-            page={page}
-            filters={filters} 
-            onChangePagination={this.onChangePagination}
-            />
-          </div>
         </div>
-      </div>
-    </div>
+      </AppContext.Provider>
     );
   }
 }

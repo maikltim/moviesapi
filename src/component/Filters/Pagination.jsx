@@ -27,7 +27,7 @@ export default class Pagination extends React.Component {
             })}
           >
             <span className="page-link" onClick={this.prevPage(page)}>
-               Назад
+               Назад
             </span>
           </li>
           <li className="page-item">
