@@ -4,6 +4,10 @@ import MoviesList from "./Movies/MoviesList";
 import Header from "./Header/Header";
 import { API_URL, API_KEY_3, fetchApi } from "../api/api";
 import Cookies from "universal-cookie";
+import MoviesPage from './pages/MoviesPage/MoviesPage'
+import MoviePage from './pages/MoviePage/MoviePage'
+import {BrowserRouter as Router, Route, Link} from "react-router-dom";
+
 
 const cookies = new Cookies();
 
@@ -80,8 +84,9 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { filters, page, total_pages, user, session_id } = this.state;
+    const { user, session_id } = this.state;
     return (
+      <Router>
       <AppContext.Provider
         value={{
           user,
@@ -91,35 +96,12 @@ export default class App extends React.Component {
           onLogOut: this.onLogOut
         }}
       >
-        <div>
           <Header user={user} />
-          <div className="container">
-            <div className="row mt-4">
-              <div className="col-4">
-                <div className="card w-100">
-                  <div className="card-body">
-                    <h3>Фильтры:</h3>
-                    <Filters
-                      page={page}
-                      total_pages={total_pages}
-                      filters={filters}
-                      onChangeFilters={this.onChangeFilters}
-                      onChangePagination={this.onChangePagination}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="col-8">
-                <MoviesList
-                  filters={filters}
-                  page={page}
-                  onChangePagination={this.onChangePagination}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+          <Link to="/movie/1">go to movie</Link>
+          <Route path="/" component={MoviesPage} />
+          <Route path="/movie/:id" component={MoviesPage} />
       </AppContext.Provider>
+      </Router>
     );
   }
 }
