@@ -1,9 +1,6 @@
 import React from "react";
 import Filters from "../../Filters/Filters";
 import MoviesList from "../../Movies/MoviesList";
-import { API_URL, API_KEY_3, fetchApi } from "../../../api/api";
-
-
 
 export default class MoviesPage extends React.Component {
   constructor() {
@@ -20,7 +17,6 @@ export default class MoviesPage extends React.Component {
     };
   }
 
-  
   onChangeFilters = event => {
     const value = event.target.value;
     const name = event.target.name;
@@ -39,7 +35,6 @@ export default class MoviesPage extends React.Component {
     });
   };
 
-  
   render() {
     const { filters, page, total_pages } = this.state;
     return (

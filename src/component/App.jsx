@@ -1,107 +1,87 @@
 import React from "react";
-import Filters from "./Filters/Filters";
-import MoviesList from "./Movies/MoviesList";
 import Header from "./Header/Header";
 import { API_URL, API_KEY_3, fetchApi } from "../api/api";
+import MoviesPage from "./pages/MoviesPage/MoviesPage";
+import MoviePage from "./pages/MoviePage/MoviePage";
 import Cookies from "universal-cookie";
-import MoviesPage from './pages/MoviesPage/MoviesPage'
-import MoviePage from './pages/MoviePage/MoviePage'
-import {BrowserRouter as Router, Route, Link} from "react-router-dom";
-
+import { BrowserRouter, Route } from "react-router-dom";
+import AccountFavorites from "./pages/AccountPage/AccountFavorites";
+import {actionCreatorUpdateAuth} from '../'
 
 const cookies = new Cookies();
 
 export const AppContext = React.createContext();
 export default class App extends React.Component {
-  constructor() {
-    super();
 
-    this.state = {
-      user: null,
-      session_id: null,
-      filters: {
-        sort_by: "popularity.desc",
-        primary_release_year: "2018",
-        with_genres: []
-      },
-      page: 1,
-      total_pages: ""
-    };
-  }
-
-  updateUser = user => {
-    this.setState({
-      user
-    });
-  };
-
-  updateSessionId = session_id => {
-    cookies.set("session_id", session_id, {
-      path: "/",
-      maxAge: 2592000
-    });
-    this.setState({
+  updateAuth = (user, session_id) => {
+    this.props.store.dispatch(actionCreatorUpdateAuth({
+      user,
       session_id
-    });
+    }))
+    // cookies.set("session_id", session_id, {
+    //   path: "/",
+    //   maxAge: 2592000
+    // });
+    // this.setState({
+    //   session_id,
+    //   user,
+    //   isAuth: true
+    // });
   };
 
   onLogOut = () => {
     cookies.remove("session_id");
     this.setState({
       session_id: null,
-      user: null
-    });
-  };
-
-  onChangeFilters = event => {
-    const value = event.target.value;
-    const name = event.target.name;
-    this.setState(prevState => ({
-      filters: {
-        ...prevState.filters,
-        [name]: value
-      }
-    }));
-  };
-
-  onChangePagination = ({ page, total_pages = this.state.total_pages }) => {
-    this.setState({
-      page,
-      total_pages
+      user: null,
+      isAuth: false
     });
   };
 
   componentDidMount() {
-    const session_id = cookies.get("session_id");
-    if (session_id) {
-      fetchApi(
-        `${API_URL}/account?api_key=${API_KEY_3}&session_id=${session_id}`
-      ).then(user => {
-        this.updateUser(user);
-        this.updateSessionId(session_id);
-      });
-    }
+
+    this.props.store.subscribe(() => {
+      console.log("change", this.props.store.getState())
+      this.forceUpdate()
+    })
+    // if (this.state.session_id) {
+    //   fetchApi(
+    //     `${API_URL}/account?api_key=${API_KEY_3}&session_id=${
+    //     this.state.session_id
+    //     }`
+    //   ).then(user => {
+    //     this.updateAuth(user, this.state.session_id);
+    //   });
+    // }
   }
 
   render() {
-    const { user, session_id } = this.state;
-    return (
-      <Router>
-      <AppContext.Provider
-        value={{
-          user,
-          session_id,
-          updateUser: this.updateUser,
-          updateSessionId: this.updateSessionId,
-          onLogOut: this.onLogOut
-        }}
-      >
-          <Header user={user} />
-          <Link to="/movie/1">go to movie</Link>
-          <Route path="/" component={MoviesPage} />
-          <Route path="/movie/:id" component={MoviesPage} />
-      </AppContext.Provider>
-      </Router>
-    );
+   const { user, session_id, isAuth } = this.props.store.getState();
+    return isAuth || !session_id ? (
+      <BrowserRouter>
+        <AppContext.Provider
+          value={{
+            user,
+            session_id,
+            isAuth,
+            onLogOut: this.onLogOut,
+            updateAuth: this.updateAuth
+          }}
+        >
+          <div>
+            <Header user={user} />
+            <Route exact path="/" component={MoviesPage} />
+            <Route path="/movie/:id" component={MoviePage} />
+            <Route path="/account/favorites" component={AccountFavorites} />
+            {/*
+              "/" - MoviesPage
+              "/movie/1" - Movie with id = 1
+            */}
+          </div>
+        </AppContext.Provider>
+      </BrowserRouter>
+    ) : (
+        <p>...Loading</p>
+      );
   }
 }
