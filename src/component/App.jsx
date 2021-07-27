@@ -1,62 +1,47 @@
 import React from "react";
 import Header from "./Header/Header";
-import { API_URL, API_KEY_3, fetchApi } from "../api/api";
+import CallApi from "../api/api";
 import MoviesPage from "./pages/MoviesPage/MoviesPage";
 import MoviePage from "./pages/MoviePage/MoviePage";
 import Cookies from "universal-cookie";
 import { BrowserRouter, Route } from "react-router-dom";
 import AccountFavorites from "./pages/AccountPage/AccountFavorites";
-import {actionCreatorUpdateAuth} from '../'
+import {actionCreatorUpdateAuth, actionCreatorLogOut} from '../actions/actions'
+import {connect} from 'react-redux'
+import {bindActionCreators} from 'redux'
 
 const cookies = new Cookies();
 
 export const AppContext = React.createContext();
-export default class App extends React.Component {
+class App extends React.Component {
 
-  updateAuth = (user, session_id) => {
-    this.props.store.dispatch(actionCreatorUpdateAuth({
-      user,
-      session_id
-    }))
-    // cookies.set("session_id", session_id, {
-    //   path: "/",
-    //   maxAge: 2592000
-    // });
-    // this.setState({
-    //   session_id,
-    //   user,
-    //   isAuth: true
-    // });
-  };
+  // updateAuth = (user, session_id) => {
+  //   this.props.store.dispatch(actionCreatorUpdateAuth({
+  //     user,
+  //     session_id
+  //   }))
+  // };
 
-  onLogOut = () => {
-    cookies.remove("session_id");
-    this.setState({
-      session_id: null,
-      user: null,
-      isAuth: false
-    });
-  };
+  // onLogOut = () => {
+  //   this.props.store.dispatch(actionCreatorLogOut())
+  // };
 
   componentDidMount() {
-
-    this.props.store.subscribe(() => {
-      console.log("change", this.props.store.getState())
-      this.forceUpdate()
-    })
-    // if (this.state.session_id) {
-    //   fetchApi(
-    //     `${API_URL}/account?api_key=${API_KEY_3}&session_id=${
-    //     this.state.session_id
-    //     }`
-    //   ).then(user => {
-    //     this.updateAuth(user, this.state.session_id);
-    //   });
-    // }
+    const { session_id } = this.props;
+    if (session_id) {
+      CallApi.get("/account", {
+        params: {
+          session_id
+        }
+      }).then(user => {
+        this.updateAuth(user, session_id);
+      });
+    }
   }
 
   render() {
-   const { user, session_id, isAuth } = this.props.store.getState();
+    console.log(this.props)
+   const { user, session_id, isAuth, updateAuth, onLogOut } = this.props;
     return isAuth || !session_id ? (
       <BrowserRouter>
         <AppContext.Provider
@@ -64,8 +49,8 @@ export default class App extends React.Component {
             user,
             session_id,
             isAuth,
-            onLogOut: this.onLogOut,
-            updateAuth: this.updateAuth
+            onLogOut,
+            updateAuth
           }}
         >
           <div>
@@ -85,3 +70,21 @@ export default class App extends React.Component {
       );
   }
 }
+
+
+const mapStateToProps = (state) => {
+  return {
+    user: state.user,
+    session_id: state.session_id,
+    isAuth: state.isAuth
+  }
+}
+
+
+const mapDispatchToProps = (dispatch) => {
+  return { 
+    updateAuth: bindActionCreators(actionCreatorUpdateAuth, dispatch),
+    onLogOut: bindActionCreators(actionCreatorLogOut, dispatch)
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(App)
