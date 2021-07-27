@@ -1,6 +1,5 @@
 import Cookies from "universal-cookie";
-import {LOGOUT, UPDATE_AUTH} from '../actions/actions'
-
+import {UPDATE_AUTH, LOGOUT} from './auth.type'
 
 const cookies = new Cookies();
 
@@ -13,7 +12,7 @@ const initialSatate = {
 
 export const authReducer = (state = initialSatate, action) =>{
     switch (action.type) {
-        case "UPDATE_AUTH":
+        case UPDATE_AUTH:
             cookies.set("session_id", action.payload.session_id, {
                 path: "/",
                 maxAge: 2592000
@@ -24,7 +23,7 @@ export const authReducer = (state = initialSatate, action) =>{
             session_id: action.payload.session_id,
             isAuth: true
         }
-        case "LOGOUT":
+        case LOGOUT:
         cookies.remove('session_id')
         return {
             ...state,
@@ -37,5 +36,4 @@ export const authReducer = (state = initialSatate, action) =>{
         return state
         
     }
-    return state
 }

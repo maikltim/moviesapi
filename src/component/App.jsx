@@ -6,7 +6,7 @@ import MoviePage from "./pages/MoviePage/MoviePage";
 import Cookies from "universal-cookie";
 import { BrowserRouter, Route } from "react-router-dom";
 import AccountFavorites from "./pages/AccountPage/AccountFavorites";
-import {actionCreatorUpdateAuth, actionCreatorLogOut} from '../actions/actions'
+import {actionCreatorUpdateAuth, actionCreatorLogOut} from '../redux/auth/auth.actions'
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux'
 
