@@ -6,7 +6,7 @@ import MoviePage from "./pages/MoviePage/MoviePage";
 import Cookies from "universal-cookie";
 import { BrowserRouter, Route } from "react-router-dom";
 import AccountFavorites from "./pages/AccountPage/AccountFavorites";
-import {actionCreatorUpdateAuth, actionCreatorLogOut} from '../redux/auth/auth.actions'
+import {actionCreatorUpdateAuth, actionCreatorLogOut, fetchAuth} from '../redux/auth/auth.actions'
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux'
 
@@ -27,15 +27,9 @@ class App extends React.Component {
   // };
 
   componentDidMount() {
-    const { session_id } = this.props;
+    const { session_id, fetchAuth } = this.props;
     if (session_id) {
-      CallApi.get("/account", {
-        params: {
-          session_id
-        }
-      }).then(user => {
-        this.updateAuth(user, session_id);
-      });
+      fetchAuth(session_id)
     }
   }
 
@@ -84,7 +78,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return { 
     updateAuth: bindActionCreators(actionCreatorUpdateAuth, dispatch),
-    onLogOut: bindActionCreators(actionCreatorLogOut, dispatch)
+    onLogOut: bindActionCreators(actionCreatorLogOut, dispatch),
+    fetchAuth
   }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(App)
